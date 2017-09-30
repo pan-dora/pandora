@@ -1,0 +1,71 @@
+version: "3"
+
+services:
+  activemq:
+    image: pandoraframework/activemq
+    container_name: activemq-test-jms
+    ports:
+      - "61616:61616"
+      - "8161:8181"
+
+  fcrepo:
+    image: fcrepo-test:0.0.1
+    container_name: fcrepo-test-jms
+    environment:
+      CATALINA_OPTS: -Dfcrepo.home=/mnt/fcrepo-data -Dfcrepo.spring.jms.configuration=file:/etc/spring/jms.xml
+    ports:
+      - "8080:8080"
+    volumes:
+      - fcrepo-volume:/mnt/fcrepo-data
+
+  fuseki:
+    image: pandoraframework/fuseki:2.4.1
+    container_name: fuseki-test-jms
+    ports:
+      - "3030:3030"
+
+  messaging:
+    image: messaging-test:0.0.1
+    container_name: messaging-test-jms
+    env_file: apix.env
+    ports:
+      - "9080:9080"
+      - "8181:8181"
+    depends_on:
+      - fcrepo
+      - fuseki
+    links:
+      - fcrepo:localhost
+      - fuseki
+    volumes:
+      - data-volume:/mnt/serialization
+
+  manifests:
+    image: pandoraframework/manifest-service:0.3.1
+    container_name: manifests-test-jms
+    env_file: apix.env
+    ports:
+      - "3000:3000"
+    depends_on:
+      - fuseki
+    links:
+      - fuseki
+
+  data-container:
+    image: pandoraframework/data-container:0.0.1
+    container_name: data-container-test-jms
+    env_file: apix.env
+    volumes:
+      - data-volume:/mnt/serialization
+
+volumes:
+  data-volume:
+    driver_opts:
+          type: none
+          device: /mnt/pandora-data/serialization
+          o: bind
+  fcrepo-volume:
+    driver_opts:
+          type: none
+          device: /mnt/pandora-data/fcrepo-data
+          o: bind

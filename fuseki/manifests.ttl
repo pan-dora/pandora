@@ -1,0 +1,20 @@
+@prefix fuseki:  <http://jena.apache.org/fuseki#> .
+@prefix ja:      <http://jena.hpl.hp.com/2005/11/Assembler#> .
+@prefix tdb:     <http://jena.hpl.hp.com/2008/tdb#> .
+@prefix :        <#> .
+
+:fedoraService a fuseki:Service ;
+    fuseki:name                        "manifests" ;
+    fuseki:serviceQuery                "sparql", "query" ;
+    fuseki:serviceUpdate               "update" ;
+    fuseki:serviceUpload               "upload" ;
+    fuseki:serviceReadWriteGraphStore  "data" ;
+    fuseki:serviceReadGraphStore       "get" ;
+    fuseki:dataset                     :dataset .
+
+:dataset a tdb:DatasetTDB ;
+    tdb:unionDefaultGraph true ;
+    ja:context [
+        ja:cxtName "arq:queryTimeout" ;
+        ja:cxtValue "10000" ] ;
+    tdb:location "/shared/manifests_data" .

@@ -1,0 +1,21 @@
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                      https://maven.apache.org/xsd/settings-1.0.0.xsd">
+    <profiles>
+        <profile>
+            <id>djatoka-settings</id>
+            <activation>
+                <property>
+                    <name>!ignoreDjatokaSettings</name>
+                </property>
+            </activation>
+            <properties>
+                <djatoka.ingest.exts>tiff,tif</djatoka.ingest.exts>
+                <djatoka.ingest.data>/mnt/serialization/binaries</djatoka.ingest.data>
+                <djatoka.ingest.maxSize>900</djatoka.ingest.maxSize>
+                <djatoka.ingest.color.space>sRGB</djatoka.ingest.color.space>
+            </properties>
+        </profile>
+    </profiles>
+</settings>

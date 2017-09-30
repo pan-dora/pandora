@@ -1,0 +1,37 @@
+{
+  "app": {
+    "authentication": true,
+    "user": "user",
+    "password": "password",
+    "defaultAccept": {
+      "tables": "application/sparql-results+json",
+      "graphs": "text/turtle",
+      "ask": "application/sparql-results+json",
+      "update": "text/html"
+    },
+    "hostname": "apix-sparqler-public-api",
+    "port": 3000,
+    "maxQueryLength": 4000
+  },
+  "endpoints": {
+    "system": {
+      "scheme": "http",
+      "headers": {}
+    },
+    "default": {
+      "scheme": "http",
+      "headers": {}
+    }
+  },
+  "iiif": {
+    "context": "http://iiif.io/api/presentation/2/context.json",
+    "service": "http://exts-sparqler:9104/sparqler?type=manifest&node=http://localhost:8080/fcrepo/rest/collection/",
+    "frame": "http://localhost:3000/frame.json",
+    "listframe": "http://localhost:3000/listframe.json",
+    "listsearchframe": "http://localhost:3000/listsearchframe.json",
+    "pageframe": "http://localhost:3000/pageframe.json"
+  },
+  "redis": {
+    "server": "redis"
+  }
+}

@@ -1,0 +1,107 @@
+version: "3"
+
+services:
+  integration-tester:
+    build: .
+    links:
+      - fcrepo:localhost
+      - fuseki
+      - manifests
+      - djatoka
+      - uv-webapp
+
+ activemq:
+     image: pandoraframework/activemq
+     container_name: activemq
+     ports:
+       - "61616:61616"
+       - "8161:8181"
+
+   loris:
+     image: pandoraframework/loris:2.1.0
+     container_name: loris
+     env_file: apix.env
+     ports:
+       - "5004:5004"
+
+   fcrepo:
+     image: pandoraframework/fcrepo:4.7.2
+     container_name: fcrepo
+     environment:
+       CATALINA_OPTS: -Dfcrepo.home=/mnt/fcrepo-data -Dfcrepo.spring.jms.configuration=file:/etc/spring/jms.xml
+     ports:
+       - "8080:8080"
+     volumes:
+       - fcrepo-volume:/mnt/fcrepo-data
+
+   fuseki:
+     image: pandoraframework/fuseki:2.4.1
+     container_name: fuseki
+     ports:
+       - "3030:3030"
+
+   messaging:
+     image: pandoraframework/messaging:4.8.2
+     container_name: messaging
+     env_file: apix.env
+     ports:
+       - "9080:9080"
+       - "8181:8181"
+     depends_on:
+       - fcrepo
+       - fuseki
+     links:
+       - fcrepo:localhost
+       - fuseki
+
+   manifests:
+     image: pandoraframework/manifest-service:0.3.1
+     container_name: manifests
+     env_file: apix.env
+     ports:
+       - "3000:3000"
+     depends_on:
+       - fuseki
+     links:
+       - fuseki
+
+   uv-webapp:
+     image: pandoraframework/uv-webapp:2.0.0
+     container_name: uv-webapp
+     env_file: apix.env
+     ports:
+       - "9001:9001"
+
+   mirador:
+     image: pandoraframework/mirador:2.1.2
+     container_name: mirador
+     env_file: apix.env
+     ports:
+       - "8000:8000"
+
+   db:
+     image: mysql:5.7
+     volumes:
+       - "./annotation-api/.data/db:/var/lib/mysql"
+     restart: always
+     ports:
+       - "3306:3306"
+     environment:
+       MYSQL_ROOT_PASSWORD: rootpass
+       MYSQL_DATABASE: catch
+       MYSQL_USER: catch
+       MYSQL_PASSWORD: catch
+
+   catcha:
+     image: pandoraframework/annotation-api:0.5.12
+     depends_on:
+       - db
+     links:
+       - db
+     volumes:
+       - "./annotation-api/.data/app:/usr/local/tomcat/webapps/ROOT/uploads"
+     ports:
+       - "8100:7070"
+
+ volumes:
+   fcrepo-volume:

@@ -1,0 +1,191 @@
+version: "2.1"
+
+services:
+  activemq:
+    image: pandorasystems/activemq
+    container_name: activemq
+    ports:
+      - "61616:61616"
+      - "8181:8181"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://activemq:8181/activemqweb"]
+      interval: 45s
+      timeout: 20s
+      retries: 10
+    networks:
+      - apix-ipv6
+
+  apix:
+    image: pandorasystems/apix
+    container_name: apix
+    env_file: apix.env
+    ports:
+      - "8001:80"
+    depends_on:
+      - fcrepo
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/docker-healthcheck.sh"]
+      interval: 20s
+      timeout: 20s
+      retries: 3
+    networks:
+      - apix-ipv6
+    links:
+      - fcrepo:localhost
+
+  exts-sparqler:
+    image: pandorasystems/exts-sparqler
+    container_name: exts-sparqler
+    ports:
+      - "9104:9104"
+    environment:
+      - FUSEKI_BASEURI=http4://fuseki:3030
+    depends_on:
+      apix:
+        condition: service_healthy
+    networks:
+      - apix-ipv6
+
+  apix-sparqler-public-api:
+    image: pandorasystems/apix-sparqler-public-api
+    container_name: apix-sparqler-public-api
+    ports:
+      - "3099:3000"
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - apix-ipv6
+
+  image-services:
+    image: pandorasystems/image-services
+    container_name: image-services
+    ports:
+      - "9105:9105"
+    environment:
+      - FCREPO_BASEURI=http://localhost:8080/fcrepo/rest
+    depends_on:
+      apix:
+        condition: service_healthy
+    volumes:
+      - loris-volume:/tmp/binaries
+    links:
+      - fcrepo:localhost
+    networks:
+      - apix-ipv6
+
+  messaging:
+    image: pandorasystems/messaging
+    container_name: messaging
+    ports:
+      - "9080:9080"
+    environment:
+      - FCREPO_BASEURI=http4://localhost:8080/fcrepo/rest
+      - FUSEKI_BASEURI=http4://fuseki:3030/fuseki/manifests
+    depends_on:
+      - fcrepo
+    links:
+      - fcrepo:localhost
+    networks:
+      - apix-ipv6
+
+  fcrepo:
+    image: pandorasystems/fcrepo:4.8.0-SNAPSHOT
+    container_name: fcrepo
+    environment:
+      CATALINA_OPTS: -Dfcrepo.home=/mnt/fcrepo-data -Dfcrepo.spring.configuration=file:/etc/fcrepo/fcrepo-config.xml -Xss8M -Dfcrepo.modeshape.configuration=file:/etc/fcrepo/repository.json
+    ports:
+      - "8080:8080"
+    depends_on:
+      activemq:
+        condition: service_healthy
+    volumes:
+      - fcrepo-volume:/mnt/fcrepo-data
+    networks:
+      - apix-ipv6
+
+  fuseki:
+    image: pandorasystems/fuseki
+    container_name: fuseki
+    environment:
+        CATALINA_OPTS: -Xmx8G -Xss8M
+    ports:
+      - "3030:3030"
+    volumes:
+      - fuseki-volume:/shared
+    networks:
+      - apix-ipv6
+
+  loris:
+    image: pandorasystems/loris:2.1.1
+    container_name: loris
+    ports:
+      - "5004:5004"
+    volumes:
+      - loris-volume:/tmp/binaries
+      - loris-cache:/tmp/loris/cache
+    networks:
+      - apix-ipv6
+
+  redis:
+    image: pandorasystems/redis
+    container_name: redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/docker-healthcheck.sh"]
+      interval: 45s
+      timeout: 20s
+      retries: 1
+    networks:
+      - apix-ipv6
+
+  mirador-sul:
+    image: ubl2/mirador-sul:0.0.4
+    container_name: mirador-sul
+    ports:
+      - "9000:4000"
+    volumes:
+      - mirador-volume:/usr/src/app/db
+    networks:
+      - apix-ipv6
+
+  uv-webapp:
+    image: pandoraframework/uv-webapp:2.0.0
+    container_name: uv-webapp
+    ports:
+      - "9001:9001"
+    networks:
+      - apix-ipv6
+
+volumes:
+  fcrepo-volume:
+#    driver_opts:
+#          type: none
+#          device: /mnt/pandora-data/fcrepo-data
+#          o: bind
+  loris-cache:
+  loris-volume:
+#    driver_opts:
+#          type: none
+#          device: /mnt/pandora-data/loris/binaries
+#          o: bind
+  fuseki-volume:
+#    driver_opts:
+#          type: none
+#          device: /mnt/pandora-data/fuseki
+#          o: bind
+  mirador-volume:
+    driver_opts:
+      type: none
+      device: /mnt/mirador-data
+      o: bind
+
+networks:
+  apix-ipv6:
+    enable_ipv6: true
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 2001:db8:2::/64

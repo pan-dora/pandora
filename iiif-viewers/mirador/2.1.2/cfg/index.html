@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <link rel="stylesheet" type="text/css" href="build/mirador/css/mirador-combined.css">
+    <title>Mirador Viewer</title>
+    <style type="text/css">
+        #viewer {
+            width: 100%;
+            height: 100%;
+            position: fixed;
+        }
+    </style>
+</head>
+<body>
+<div id="viewer"></div>
+
+<script src="build/mirador/mirador.js"></script>
+<script type="text/javascript">
+
+    $(function () {
+        Mirador({
+            "id": "viewer",
+            "layout": "1x1",
+            "data": [
+                {"manifestUri": "https://iiif.lib.harvard.edu/manifests/drs:48309543", "location": "Harvard University"}
+            ],
+            "windowObjects": [],
+            "annotationEndpoint": {
+                "name": "Catcha",
+                "module": "CatchEndpoint",
+                options: {
+                    'prefix':'http://localhost:8100/annotator',
+                    'url': 'http://localhost:8100',
+                    'APIKey': '7cd118c2-30c1-4b30-8c11-0de8030bdf56',
+                    'token':'eyJhbGciOiJIUzI1NiIsImN0eSI6InRleHRcL3BsYWluIiwidHlwIjoiSldTIn0.eyJjb25zdW1lcktleSI6ImQyMTI0ZDRhLWYzNjctNGE1OC1hNjgyLTViMzU2Nzc2MTlkYyIsImlzc3VlZEF0IjoiMjAxNy0wMi0xMVQxMDozNToxMSBHTVQiLCJ1c2VySWQiOiJhZG1pbiIsImp0aSI6IjMxYmVlYTZmLThkZGUtNGJjOS04N2IxLTQ3N2YxMmJhNDgwZiIsInR0bCI6ODY0MDAsImlhdCI6MTQ4NjgwOTMxMX0.qCjbHghhx_W656bzS-MRpWo0TpHO8R00K0kxyi3yEcM'
+                }
+            }
+        });
+    });
+</script>
+</body>
+</html>

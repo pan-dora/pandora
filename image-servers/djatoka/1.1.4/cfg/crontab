@@ -1,0 +1,4 @@
+* * * * * root /usr/bin/curl -s 'http://localhost:8888/ingest?unattended=true' >>/var/log/cron.log 2>&1
+#
+
+
