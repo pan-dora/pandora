@@ -1,0 +1,56 @@
+server:
+  applicationConnectors:
+    - type: http
+      port: 8080
+  requestLog:
+    appenders:
+      - type: file
+        currentLogFilename: /var/lib/trellis/log/access.log
+        archive: true
+        archivedLogFilenamePattern: /var/lib/trellis/log/access-%i.log
+        archivedFileCount: 5
+        maxFileSize: 100K
+
+logging:
+  level: WARN
+  loggers:
+    org.trellisldp: DEBUG
+    io.dropwizard: DEBUG
+  appenders:
+    - type: console
+
+partitions:
+    - id: repository
+      binaries:
+          path: /var/lib/trellis/binaries
+      resources:
+          path: /var/lib/trellis/resources
+      baseUrl: http://trellis:8080/
+
+namespaces:
+    file: /opt/trellis/etc/namespaces.json
+
+zookeeper:
+    ensembleServers: zoo1:2181
+
+kafka:
+    bootstrapServers: kafka:9092
+
+auth:
+    webac:
+        enabled: false
+    anon:
+        enabled: true
+    jwt:
+        enabled: false
+        base64Encoded: false
+        key: secret
+    basic:
+        enabled: false
+        usersFile: /opt/trellis/etc/users.auth
+
+cors:
+    allowOrigin:
+        - "*"
+    maxAge: 180
+
