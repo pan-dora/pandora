@@ -1,0 +1,3 @@
+[submodule "trellis-deployment"]
+	path = trellis-deployment
+	url = https://github.com/trellis-ldp/trellis-deployment.git
